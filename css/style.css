@@ -1,0 +1,31 @@
+body{
+    text-align: center;
+}
+table {
+    display: inline;
+    border: 3px solid blacks;
+}
+
+.board td {
+    width: 30px;
+    height: 30px;
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+    transition: background-color 0.5s;
+    cursor: pointer;
+}
+.game-over-modal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    display: none;	
+    width: 40%;
+    height: 70%;
+    background-color: #a09c9c;
+    box-sizing: border-box;
+    z-index: 9999;
+  }
