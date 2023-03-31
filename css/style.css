@@ -1,31 +1,76 @@
-body{
+body {
     text-align: center;
+    background-color: lightgoldenrodyellow;
 }
+
 table {
     display: inline;
     border: 3px solid blacks;
 }
 
+.cell {
+    border: outset;
+}
+
 .board td {
-    width: 30px;
-    height: 30px;
-    border: 1px solid black;
-    padding: 10px;
+    width: 20px;
+    height: 20px;
+    padding: 7px;
     text-align: center;
-    transition: background-color 0.5s;
+    background-color: lightgray;
     cursor: pointer;
 }
-.game-over-modal{
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-    display: none;	
-    width: 40%;
-    height: 70%;
-    background-color: #a09c9c;
-    box-sizing: border-box;
-    z-index: 9999;
-  }
+
+.emoji {
+    cursor: pointer;
+    margin-inline: 25%;
+}
+
+.life {
+    margin: 1%;
+}
+
+button {
+    padding: 5px;
+    margin-left: 1%;
+    cursor: pointer;
+}
+
+th {
+    border: outset;
+    background-color: lightgray;
+    padding: 10px;
+}
+
+.sec {
+
+    font-family: 'MS Sans Serif';
+    font-size: 14px;
+    border: outset;
+    width: 200px;
+    height: 22px;
+    padding: 1px;
+    background-color: lightgray;
+
+
+}
+
+.counter {
+    font-family: 'MS Sans Serif';
+    font-size: 14px;
+    border: outset;
+    width: 200px;
+    height: 22px;
+    padding: 1px;
+    background-color: lightgray;
+}
+
+.clicked {
+    width: 30px;
+    height: 30px;
+    border: 2px solid black;
+    padding: 7px;
+    text-align: center;
+    background-color: lightgrey;
+
+}

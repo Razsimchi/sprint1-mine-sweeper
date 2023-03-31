@@ -10,6 +10,8 @@ const FLAG = '🚩'
 const NORMAL = '😃'
 const LOSE = '💀'
 const WIN = '😎'
+const LIFE = '❤️'
+
 
 
 var gMinesPos = []
@@ -22,18 +24,22 @@ var gGame = {
 var gBoard
 var gCountLife = 0
 var gMinesCount
-var gIsWin 
+var gIsWin
+var gSec
+var gClockInterval
+
 
 
 function onInit() {
     gBoard = buildBoard()
-    console.table(gBoard)     
     renderBoard(gBoard, '.container')
     renderMinesCount()
-    gIsWin=false
+    gIsWin = false
+    gSec = 0
     renderEmoji()
-    
-    
+    time()
+    renderLife()
+
 }
 function buildBoard() {
     const board = []
@@ -50,7 +56,6 @@ function buildBoard() {
     }
     return board
 }
-
 function setMinesNegsCount() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
@@ -60,16 +65,17 @@ function setMinesNegsCount() {
         }
     }
 }
-function renderMinesCount(){
+function renderMinesCount() {
     const minesCountDown = gLevel.MINES - gGame.markedCount
-    const elCounter =document.querySelector('.counter')
+    const elCounter = document.querySelector('.counter')
     elCounter.innerHTML = minesCountDown
 
 }
 function onCellClicked(elCell, cellI, cellJ) {
-    if(gGame.shownCount===0){
-        addRndMinespos(cellI,cellJ)
+    if (gGame.shownCount === 0) {
+        addRndMinespos(cellI, cellJ)
         setMinesNegsCount()
+        gClockInterval = setInterval(time, 1000)
     }
     if (gBoard[cellI][cellJ].isMarked) return
     if (!gGame.isOn) return
@@ -82,21 +88,22 @@ function onCellClicked(elCell, cellI, cellJ) {
     }
     else expandShown(cellI, cellJ)
     checkWin()
-    console.log(gMinesPos)
 }
-function isAllMinesMark(){
+function isAllMinesMark() {
     for (var i = 0; i < gMinesPos.length; i++) {
         const location = gMinesPos[i]
         if (!gBoard[location.i][location.j].isMarked) return false
     }
     return true
-    
+
 }
 function checkWin() {
     const amountOfCells = (gLevel.SIZE ** 2) - gLevel.MINES
-    if ((gGame.shownCount === amountOfCells)&&(isAllMinesMark())) {
+    if ((gGame.shownCount === amountOfCells) && (isAllMinesMark())) {
         gGame.isOn = false
         gIsWin = true
+        clearInterval(gClockInterval)
+        time()
         renderEmoji()
     }
 }
@@ -110,13 +117,16 @@ function expandShown(cellI, cellJ) {
             if (j < 0 || j >= gBoard[i].length) continue
             if (gBoard[i][j].isMarked) continue
             const location = { i, j }
-            var value = (gBoard[i][j].minesAroundCount !== 0) ? gBoard[i][j].minesAroundCount : '0'
-            if(!gBoard[i][j].isShown){
+            var value = (gBoard[i][j].minesAroundCount) ? gBoard[i][j].minesAroundCount : ''
+            if (!gBoard[i][j].isShown) {
                 gGame.shownCount++
-            } 
+                gBoard[i][j].isShown = true
+                if(!value) expandShown(i,j)
+            }
             gBoard[i][j].isShown = true
+            changeOpenCellColor(i,j)
             renderCell(location, value)
-        }
+                    }
     }
 
 }
@@ -127,6 +137,8 @@ function gameOver() {
     }
     gGame.isOn = false
     renderEmoji()
+    clearInterval(gClockInterval)
+    time()
 
 
 }
@@ -138,13 +150,14 @@ function playSound() {
 function hundleMine(cellI, cellJ) {
     const location = { i: cellI, j: cellJ }
     gCountLife++
+    renderLife()
     if (isGameOver()) gameOver()
     else {
         playSound()
         renderCell(location, MINE)
         setTimeout(() => {
             renderCell(location, '')
-        }, 3000);
+        }, 1500);
     }
 
 
@@ -153,14 +166,20 @@ function openCell(cellI, cellJ) {
     const location = { i: cellI, j: cellJ }
     gBoard[cellI][cellJ].isShown = true
     gGame.shownCount++
+    changeOpenCellColor(cellI,cellJ)
     renderCell(location, gBoard[cellI][cellJ].minesAroundCount)
 
 }
-function getRndMinesPos(cellI,cellJ) {
+function changeOpenCellColor(cellI,cellJ){
+    const elTd=document.querySelector(`.cell-${cellI}-${cellJ}`)
+    elTd.style.backgroundColor = 'gray'
+
+}
+function getRndMinesPos(cellI, cellJ) {
     var locations = []
     for (var i = 0; i < gLevel.SIZE; i++) {
         for (var j = 0; j < gLevel.SIZE; j++) {
-            if(cellI===i&&cellJ===j) continue
+            if (cellI === i && cellJ === j) continue
             locations.push({ i, j })
         }
     }
@@ -170,8 +189,8 @@ function getRndMinesPos(cellI,cellJ) {
         locations.splice(rndIdx, 1)
     }
 }
-function addRndMinespos(cellI,cellJ) {
-    getRndMinesPos(cellI,cellJ)
+function addRndMinespos(cellI, cellJ) {
+    getRndMinesPos(cellI, cellJ)
     for (var i = 0; i < gMinesPos.length; i++) {
         const location = gMinesPos[i]
         gBoard[location.i][location.j].isMine = true
@@ -182,6 +201,7 @@ function onRightClick(cellI, cellJ) {
         e.preventDefault()
     }, false)
     const location = { i: cellI, j: cellJ }
+    if(gBoard[cellI][cellJ].isShown) return
     if (gBoard[cellI][cellJ].isMarked) {
         gBoard[cellI][cellJ].isMarked = false
         gGame.markedCount--
@@ -195,18 +215,6 @@ function onRightClick(cellI, cellJ) {
     }
     renderMinesCount()
 }
-function displayGameOverModal() {
-    const msg = isGameOver() ? 'Game Over' : 'You Win!'
-    const elModal = document.querySelector('.game-over-modal')
-    elModal.style.display = 'Block'
-    elModal.querySelector('h2').innerHTML = msg
-}
-
-function hideGameOverModal() {
-    const elModal = document.querySelector('.game-over-modal')
-    elModal.style.display = 'none'
-
-}
 function restart() {
     gGame = {
         isOn: true,
@@ -216,7 +224,7 @@ function restart() {
     }
     gMinesPos = []
     gCountLife = 0
-    hideGameOverModal()
+    clearInterval(gClockInterval)
     onInit()
 
 }
@@ -235,14 +243,44 @@ function onClickLevel(elBtn) {
     }
     restart()
 }
-function onEmojiClick(){
+function onEmojiClick() {
     restart()
 }
-function renderEmoji(){
+function renderEmoji() {
     var elEmoji = document.querySelector('.emoji')
     var msg = NORMAL
-    if(gIsWin) msg=WIN 
-    else if(isGameOver()) msg=LOSE
-    elEmoji.innerHTML=msg
-    
+    if (gIsWin) msg = WIN
+    else if (isGameOver()) msg = LOSE
+    elEmoji.innerHTML = msg
+
+}
+function time() {
+    gSec = checkTime(gSec)
+    document.querySelector('.sec').innerHTML = gSec;
+    gSec++
+
+}
+function checkTime(time) {
+    if (time < 10) time = '00' + time
+    else if (time < 100) time = '0' + time
+    return time
+}
+function renderLife() {
+    var msg
+    switch (gCountLife) {
+        case 0:
+            msg = LIFE + LIFE + LIFE
+            break
+        case 1:
+            msg = LIFE + LIFE
+            break
+        case 2:
+            msg = LIFE
+            break
+        default:
+            msg = ''
+            break
+    }
+
+    document.querySelector('.life').innerHTML=msg
 }

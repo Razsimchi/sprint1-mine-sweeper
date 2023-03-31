@@ -24,7 +24,7 @@ function countNeighbors(cellI, cellJ, mat) {
 }
 function renderBoard(mat, selector) {
 
-    var strHTML = `<table class="board" border="0"><tr><th colspan="${gLevel.SIZE}"><span class="counter"></span><span onclick="onEmojiClick()" class="emoji"></span><span class="sec"></span></th></tr><tbody>`
+    var strHTML = `<table class="board"><tr><th colspan="${gLevel.SIZE}"><span class="counter"></span><span onclick="onEmojiClick()" class="emoji"></span><span class="sec"></span></th></tr><tbody>`
     for (var i = 0; i < mat.length; i++) {
         strHTML += '<tr>'
         for (var j = 0; j < mat[0].length; j++) {
